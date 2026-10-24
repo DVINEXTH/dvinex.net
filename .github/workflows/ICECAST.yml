@@ -1,0 +1,82 @@
+name: ICECAST 24/7 ENTERPRISE PRODUCTION MATRIX
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  icecast-matrix-run:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        RUNNER_ID: [1, 2, 3]
+    steps:
+      - name: 1. PRE-LOAD ENVIRONMENT AND TUNING SYSTEM NETWORK SOCKETS
+        run: |
+          echo "[!] INITIALIZING ENTERPRISE PRODUCTION MATRIX ENVIRONMENT FOR RUNNER SECTOR ${{ matrix.RUNNER_ID }}..."
+          sudo apt-get update -qq && sudo apt-get install -y curl parallel > /dev/null
+          
+          # EXTENDING SYSTEM LIMITS FOR MAXIMUM CONCURRENT NETWORK SOCKETS
+          sudo sysctl -w net.core.somaxconn=2048 > /dev/null
+          sudo sysctl -w net.ipv4.tcp_max_syn_backlog=4096 > /dev/null
+          ulimit -n 65535
+          
+          # STANDBY MODE: 10 MINUTE OVERLAP TRANSITION TO PREVENT DROPPING STATS
+          echo "[!] STANDBY MODE: WAITING FOR OVERLAP TRANSITION..."
+          sleep 600 
+
+      - name: 2. GENERATE HIGH-DENSITY THAI TRAFFIC MATRIX SECTOR
+        run: |
+          STREAM_URL="https://eagle.streemlion.com/proxy/dvinexc2?mp=/stream"
+          
+          TH_PREFIXES=(
+            "1.46" "1.47" "27.55" "49.228" "49.230" "58.8" "58.9" "58.11" "101.108" "101.109" 
+            "110.164" "110.168" "115.87" "118.172" "124.120" "124.121" "124.122" "134.236" 
+            "171.96" "171.100" "180.180" "182.52" "184.22" "223.204" "223.205" "223.24"
+            "119.42" "171.4" "183.88" "183.89" "202.28" "202.29" "203.144" "203.150"
+          )
+          NUM_PREFIXES=${#TH_PREFIXES[@]}
+
+          rm -f production_matrix_pool.txt
+          echo "[!] COMPILING 330 HIGH-DENSITY LISTENERS FOR SECTOR ${{ matrix.RUNNER_ID }}..."
+
+          for i in {1..330}
+          do
+            RAND_IDX=$(( RANDOM % NUM_PREFIXES ))
+            PREFIX=${TH_PREFIXES[$RAND_IDX]}
+            O3=$(( RANDOM % 254 + 1 ))
+            O4=$(( RANDOM % 254 + 1 ))
+            TH_IP="$PREFIX.$O3.$O4"
+
+            RAND_UA=$(( RANDOM % 5 ))
+            V1=$(( RANDOM % 10 + 120 ))
+            V2=$(( RANDOM % 90 + 10 ))
+            V3=$(( RANDOM % 5000 + 1000 ))
+            
+            if [ $RAND_UA -eq 0 ]; then
+              UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$V1.0.$V3.$V2 Safari/537.36"
+            elif [ $RAND_UA -eq 1 ]; then
+              UA="Mozilla/5.0 (iPhone; CPU iPhone OS 17_$((RANDOM%6)) like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.$((RANDOM%5)) Mobile/15E148 Safari/604.1"
+            elif [ $RAND_UA -eq 2 ]; then
+              UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$V1.0.$V2.$V3 Safari/537.36"
+            elif [ $RAND_UA -eq 3 ]; then
+              UA="Mozilla/5.0 (Linux; Android $((RANDOM%5+10)); SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$V1.0.$V3.$V2 Mobile Safari/537.36"
+            else
+              UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:$V1.0) Gecko/20100101 Firefox/$V1.0"
+            fi
+
+            MICROSLEEP=$(( RANDOM % 2 ))
+            
+            echo "sleep $MICROSLEEP && curl -s -N --http2 --compressed --retry 999 --retry-max-time 9600 --keepalive-time 5 --speed-limit 5 --speed-time 15 -H 'X-Forwarded-For: $TH_IP' -H 'Client-IP: $TH_IP' -H 'Via: 1.1 squid' -H 'Forwarded: for=$TH_IP' -A '$UA' --max-time 9600 '$STREAM_URL' > /dev/null" >> production_matrix_pool.txt
+          done
+          echo "[+] SECTOR MATRIX GENERATED SUCCESSFULLY."
+
+      - name: 3. EXECUTE CONTROLLED SUSTAINED INJECTION 330 LISTENERS
+        run: |
+          echo "[!] INJECTING 330 SUSTAINED CONNECTIONS FROM SECTOR RUNNER ${{ matrix.RUNNER_ID }}..."
+          parallel -j 330 < production_matrix_pool.txt || true
+          echo "[+] WORKFLOW SECTOR TIMELINE COMPLETED."
