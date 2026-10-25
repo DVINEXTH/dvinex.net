@@ -25,14 +25,10 @@ jobs:
           sudo sysctl -w net.core.somaxconn=2048 > /dev/null
           sudo sysctl -w net.ipv4.tcp_max_syn_backlog=4096 > /dev/null
           ulimit -n 65535
-          
-          # STANDBY MODE: 10 MINUTE OVERLAP TRANSITION TO PREVENT DROPPING STATS
-          echo "[!] STANDBY MODE: WAITING FOR OVERLAP TRANSITION..."
-          sleep 600 
 
       - name: 2. GENERATE HIGH-DENSITY THAI TRAFFIC MATRIX SECTOR
         run: |
-          STREAM_URL="https://eagle.streemlion.com/proxy/dvinexc2?mp=/stream"
+          STREAM_URL="https://streemlion.com"
           
           TH_PREFIXES=(
             "1.46" "1.47" "27.55" "49.228" "49.230" "58.8" "58.9" "58.11" "101.108" "101.109" 
@@ -71,7 +67,8 @@ jobs:
               UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:$V1.0) Gecko/20100101 Firefox/$V1.0"
             fi
 
-            MICROSLEEP=$(( RANDOM % 2 ))
+            # INCREASED MICROSLEEP DELAY TO STAGGER NETWORK CONNECTIONS AND BYPASS FIREWALL RATE LIMITING
+            MICROSLEEP=$(( RANDOM % 90 ))
             
             echo "sleep $MICROSLEEP && curl -s -N --http2 --compressed --retry 999 --retry-max-time 9600 --keepalive-time 5 --speed-limit 5 --speed-time 15 -H 'X-Forwarded-For: $TH_IP' -H 'Client-IP: $TH_IP' -H 'Via: 1.1 squid' -H 'Forwarded: for=$TH_IP' -A '$UA' --max-time 9600 '$STREAM_URL' > /dev/null" >> production_matrix_pool.txt
           done
