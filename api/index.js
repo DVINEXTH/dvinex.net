@@ -1,0 +1,7 @@
+{
+  "name": "ICECAST BOT",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node api/index.js"
+  }
+}
