@@ -28,7 +28,7 @@ jobs:
 
       - name: 2. GENERATE HIGH-DENSITY THAI TRAFFIC MATRIX SECTOR
         run: |
-          STREAM_URL="https://streemlion.com"
+          STREAM_URL="https://eagle.streemlion.com/proxy/dvinexc2?mp=/stream"
           
           TH_PREFIXES=(
             "1.46" "1.47" "27.55" "49.228" "49.230" "58.8" "58.9" "58.11" "101.108" "101.109" 
